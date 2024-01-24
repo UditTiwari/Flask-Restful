@@ -11,7 +11,7 @@ class UserList(Resource):
     def post(self):
         data = request.json
         last_user_id = users[-1].get("id")
-        new_user = {"":last_user_id+1,**data}
+        new_user = {"id":last_user_id+1,**data}
         users.append(new_user)
 
         return {"msg":"User Created","user":new_user}
@@ -35,10 +35,21 @@ class UserResource(Resource):
                 users[i] = {**u,**data} #**data will overdie the **u
                 user = users[i]
 
-            if user is None:
-                abort(404)
+        if user is None:
+            abort(404)
 
-            return {"msg":"User is updated","user",user}
+        return {"msg":"User is updated","user":user}
         
 
     def delete(self,user_id):
+        user = None
+        for i ,u in enumerate(users):
+            if u.get("id") == user_id:
+                user = u
+                users.pop(i)
+
+        if user is None:
+            abort(404)
+
+        return {"msg":"User deleted"}
+
