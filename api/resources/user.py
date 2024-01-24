@@ -3,12 +3,15 @@ from users import users
 from flask import request ,jsonify
 from models.users import User
 from extensions import db
+from api.schemas.user import UserSchema
+
 
 class UserList(Resource):
 
     def get(self):
         users = User.query.all()
-        return jsonify(results=users)
+        schema = UserSchema(many=True)
+        return {"results":schema.dump(users)}
     
     def post(self):
         data = request.json

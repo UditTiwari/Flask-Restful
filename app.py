@@ -1,7 +1,7 @@
 from flask import Flask
 from api.views import blueprint
 from dotenv import load_dotenv
-from extensions import db
+from extensions import db,migrate
 import os
 load_dotenv()
 
@@ -13,6 +13,7 @@ app.config.from_object("config")
 
 
 db.init_app(app)
+migrate.init_app(app,db)
 
 
 if __name__=='__main__':
