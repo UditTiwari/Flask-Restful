@@ -1,6 +1,7 @@
 from flask import Flask
 from api.views import blueprint
 from dotenv import load_dotenv
+from extensions import db
 import os
 load_dotenv()
 
@@ -8,11 +9,13 @@ load_dotenv()
 app = Flask(__name__)
 
 app.register_blueprint(blueprint=blueprint)
+app.config.from_object("config")
 
 
-debug = os.environ.get("FLASK_DEBUG")
-host = os.environ.get("FLASK_HOST","0.0.0.0")
-port = os.environ.get("FLASK_PORT",8000)
+db.init_app(app)
+
 
 if __name__=='__main__':
-    app.run(host=host,port=port,debug=debug)
+    # app.run(host=host,port=port,debug=debug)
+
+    app.run(host=app.config.get("host"),port=8000,debug=app.config.get("debug"))

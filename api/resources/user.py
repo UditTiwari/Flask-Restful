@@ -1,55 +1,81 @@
 from flask_restful import Resource,abort
 from users import users
-from flask import request
-
+from flask import request ,jsonify
+from models.users import User
+from extensions import db
 
 class UserList(Resource):
 
     def get(self):
-        return {"result":users}
+        users = User.query.all()
+        return jsonify(results=users)
     
     def post(self):
         data = request.json
-        last_user_id = users[-1].get("id")
-        new_user = {"id":last_user_id+1,**data}
-        users.append(new_user)
 
-        return {"msg":"User Created","user":new_user}
+        user = User(
+            name=data.get("name"),
+            age=data.get("age"),
+            email=data.get("email"),
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        # last_user_id = users[-1].get("id")
+        # new_user = {"id":last_user_id+1,**data}
+        # users.append(new_user)
+
+        return jsonify(msg="User Created",user=user)
     
 class UserResource(Resource):
     def get(self,user_id):
-        user = next(filter(lambda u :u.get("id") == user_id,users),None)
+        # user = next(filter(lambda u :u.get("id") == user_id,users),None)
+        user = User.query.get_or_404(user_id)
 
-        if user is None:
-            abort(404)
+        # if user is None:
+        #     abort(404)
 
-        return {"user":user}
+        # return {"user":user}
+        return jsonify(user=user)
     
     def put(self,user_id):
         data = request.json
+        user = User.query.get_or_404(user_id)
+        user.age = data.get("age")
+        user.name = data.get("name")
 
-        user = None
+        db.session.commit()
 
-        for i ,u in enumerate(users):
-            if u.get("id") == user_id:
-                users[i] = {**u,**data} #**data will overdie the **u
-                user = users[i]
+        return jsonify(msg="User updated",user=user)
 
-        if user is None:
-            abort(404)
+        # user = None
 
-        return {"msg":"User is updated","user":user}
+        # for i ,u in enumerate(users):
+        #     if u.get("id") == user_id:
+        #         users[i] = {**u,**data} #**data will overdie the **u
+        #         user = users[i]
+
+        # if user is None:
+        #     abort(404)
+
+        # return {"msg":"User is updated","user":user}
         
 
     def delete(self,user_id):
-        user = None
-        for i ,u in enumerate(users):
-            if u.get("id") == user_id:
-                user = u
-                users.pop(i)
 
-        if user is None:
-            abort(404)
+        user = User.query.get_or_404(user_id)
 
-        return {"msg":"User deleted"}
+        db.session.delete(user)
+
+        return jsonify(mes = "User deleted")
+        # user = None
+        # for i ,u in enumerate(users):
+        #     if u.get("id") == user_id:
+        #         user = u
+        #         users.pop(i)
+
+        # if user is None:
+        #     abort(404)
+
+        # return {"msg":"User deleted"}
 
